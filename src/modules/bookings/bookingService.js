@@ -56,6 +56,11 @@ class BookingService {
       .sort({ slotDate: 1, slotTime: 1 });
   }
 
+    async getAllBookings() {
+    // This is where the database query belongs.
+    return Booking.find({}).sort({ createdAt: -1 }); // Sorting is a good practice
+  }
+
   async updateBookingStatus(bookingId, status) {
     const validStatuses = ['Confirmed', 'In-Progress', 'Completed', 'Cancelled'];
     if (!validStatuses.includes(status)) {

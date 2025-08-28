@@ -19,5 +19,5 @@ router.get('/location/:locationId', authorizeRoles('staff', 'manager'), bookingC
 
 // Staff/Manager updates the status of a booking
 router.patch('/:bookingId/status', authorizeRoles('staff', 'manager'), updateStatusValidator, validate, bookingController.updateBookingStatus);
-
+router.get('/all', verifyJWT, authorizeRoles('manager'), bookingController.getAllBookings);
 export default router;
