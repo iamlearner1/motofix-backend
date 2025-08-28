@@ -45,7 +45,13 @@ class BookingService {
   async getBookingsByLocationId(locationId) {
     return Booking.find({ location: locationId })
       .populate('customer', 'name email')
-      .populate('vehicle')
+      .populate({
+        path: 'vehicle',
+        populate: {
+          path: 'vehicleInfo',
+          model: 'PredefinedVehicle'
+        }
+      })
       .populate('bookedServices', 'name')
       .sort({ slotDate: 1, slotTime: 1 });
   }
