@@ -30,6 +30,24 @@ class UserService {
     const createdUser = await User.findById(newStaffMember._id).select('-password').populate('role').populate('location');
     return createdUser;
   }
+
+  async updateUserProfile(userId, updateData) {
+    const { name, email } = updateData;
+
+    // Find the user and update their details
+    // { new: true } ensures that the updated document is returned
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, email },
+      { new: true, runValidators: true }
+    ).select('-password').populate('role');
+
+    if (!updatedUser) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    return updatedUser;
+  }
 }
 
 export const userService = new UserService();

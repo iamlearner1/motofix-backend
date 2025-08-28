@@ -14,3 +14,17 @@ export const createStaffValidator = [
   body('password').isLength({ min: 6 }).withMessage('Temporary password must be at least 6 characters long'),
   body('location').isMongoId().withMessage('A valid location ID must be provided to assign the staff member'),
 ];
+
+
+export const updateUserValidator = [
+  body('name').trim().notEmpty().withMessage('Name cannot be empty'),
+  body('email')
+    .isEmail().withMessage('Please provide a valid email address')
+    .custom(async (value, { req }) => {
+      // Find a user with the new email, but make sure it's not the current user
+      const user = await User.findOne({ email: value });
+      if (user && user._id.toString() !== req.user._id.toString()) {
+        return Promise.reject('This email address is already in use by another account.');
+      }
+    }),
+];
