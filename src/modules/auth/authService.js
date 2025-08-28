@@ -1,21 +1,33 @@
 import { User } from '../users/userModel.js';
-import { Role } from '../users/roleModel.js';
+import { Role } from '../users/roleModel.js'; // Ensure Role is imported
 import { ApiError } from '../../utils/apiError.js';
 
 class AuthService {
-  async registerUser({ name, email, password, roleName = 'user' }) {
-    const role = await Role.findOne({ name: roleName });
-    if (!role) {
-      // This is a setup step: ensure roles are in the DB.
-      // For now, we throw an error. A real app might seed the DB.
-      throw new ApiError(500, `Default role '${roleName}' not found. Please setup database roles.`);
+  // --- THIS IS THE UPDATED METHOD ---
+  async registerUser({ name, email, password }) {
+    // 1. Find the specific 'user' role from the database.
+    const userRole = await Role.findOne({ name: 'user' });
+
+    // 2. This is a critical server configuration check. If the 'user' role doesn't exist,
+    //    the system cannot register new users.
+    if (!userRole) {
+      throw new ApiError(500, 'Configuration error: Default "user" role not found.');
     }
 
-    const user = await User.create({ name, email, password, role: role._id });
+    // 3. Create the user, explicitly assigning the 'user' role's ObjectId.
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: userRole._id, // Hardcode the role here
+    });
+
+    // 4. Find and return the newly created user, populating their role.
     const createdUser = await User.findById(user._id).select('-password').populate('role');
     return createdUser;
   }
 
+  // --- The loginUser method remains exactly the same ---
   async loginUser({ email, password }) {
     const user = await User.findOne({ email }).populate('role');
     if (!user) {
